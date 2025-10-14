@@ -16,7 +16,6 @@ jobs:
         run: |
           VERSIONS="<20.0.0 <21.0.0 main"
           PREV_JOB="initial-step"
-          
           MATRIX_JSON="[]"
           
           for VERSION in $VERSIONS; do
@@ -32,21 +31,22 @@ jobs:
 
   initial-step:
     runs-on: ubuntu-latest
+    needs: [create_sequence]
     steps:
       - run: echo "Starting the sequential run."
 
   integration-test:
-    needs: [create_sequence, initial-step]
-    
     runs-on: ubuntu-latest
     
     strategy:
       fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.create_sequence.outputs.matrix) }}
+        
     id: ${{ matrix.id }}
     name: "Tutor Integration Tests - ${{ matrix.tutor_version }}"
     needs: 
+      - initial-step
       - ${{ matrix.needs_job }}
 
     steps:
